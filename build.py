@@ -5,7 +5,7 @@ import os
 from cffi import FFI
 
 #
-for f in ('xhash_.c', 'xhash_.o', 'xhash_.so'):
+for f in ('xhashlib.c', 'xhashlib.o', 'xhashlib.so'):
     try:
         os.unlink(f)
     except FileNotFoundError:
@@ -13,7 +13,7 @@ for f in ('xhash_.c', 'xhash_.o', 'xhash_.so'):
 
 ffi = FFI()
 
-ffi.set_source("xhash_", open('xhash.c').read(), libraries=[],
+ffi.set_source("xhashlib", open('xhash.c').read(), libraries=[],
     extra_compile_args=[
         "-std=gnu11",
         "-Wall",
@@ -30,14 +30,14 @@ ffi.cdef('unsigned long long xhash64 (const void* restrict, const unsigned int);
 ffi.cdef('void xhash128 (const void* restrict, const unsigned int, void* const restrict);')
 ffi.cdef('void xhash256 (const void* restrict, const unsigned int, void* const restrict);')
 
-ffi.compile(target=('xhash_.so'))
+ffi.compile(target=('xhashlib.so'))
 
 #
-for f in ('xhash_.c', 'xhash_.o'):
+for f in ('xhashlib.c', 'xhashlib.o'):
     try:
         os.unlink(f)
     except FileNotFoundError:
         pass
 
 # VERIFY
-assert 64 <= os.stat('xhash_.so').st_size
+assert 64 <= os.stat('xhashlib.so').st_size
