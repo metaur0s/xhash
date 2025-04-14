@@ -131,14 +131,14 @@ u64 xhash64 (const void* restrict data, uint size) {
         x = swap64(swap64(swap64(x + F) + D) + H) + B;
 
         // ACCUMULATE AND MIX ALL
-        A += (x += C) * H;
-        B += (x += D) * G;
-        C += (x += E) * F;
-        D += (x += F) * E;
-        E += (x += G) * D;
-        F += (x += H) * C;
-        G += (x += A) * B;
-        H += (x += B) * A;
+        E += A += x += C * H;
+        A += B += x += D * G;
+        F += C += x += E * F;
+        B += D += x += F * E;
+        G += E += x += G * D;
+        C += F += x += H * C;
+        H += G += x += A * B;
+        D += H += x += B * A;
 
         // PARANOIA
         x = swap64(swap64(swap64(x + A) + C) + E) + G;
