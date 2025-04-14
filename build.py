@@ -5,7 +5,7 @@ import os
 from cffi import FFI
 
 #
-for f in ('xhashlib.c', 'xhashlib.o', 'xhashlib.so'):
+for f in ('xstreamlib.c', 'xstreamlib.o', 'xstreamlib.so'):
     try:
         os.unlink(f)
     except FileNotFoundError:
@@ -13,7 +13,7 @@ for f in ('xhashlib.c', 'xhashlib.o', 'xhashlib.so'):
 
 ffi = FFI()
 
-ffi.set_source("xhashlib", open('xhash.c').read(), libraries=[],
+ffi.set_source("xstreamlib", open('xstream.c').read(), libraries=[],
     extra_compile_args=[
         "-std=gnu11",
         "-Wall",
@@ -26,19 +26,17 @@ ffi.set_source("xhashlib", open('xhash.c').read(), libraries=[],
     ]
 )
 
-ffi.cdef('unsigned short xhash16 (const void* restrict, const unsigned int);')
-ffi.cdef('unsigned long long xhash64 (const void* restrict, const unsigned int);')
-ffi.cdef('void xhash128 (const void* restrict, const unsigned int, void* const restrict);')
-ffi.cdef('void xhash256 (const void* restrict, const unsigned int, void* const restrict);')
+ffi.cdef('unsigned long long xcsum (const void* restrict, const unsigned int, unsigned long long);')
+ffi.cdef('void xhash (const void* restrict, const unsigned int, void* const restrict);')
 
-ffi.compile(target=('xhashlib.so'))
+ffi.compile(target=('xstreamlib.so'))
 
 #
-for f in ('xhashlib.c', 'xhashlib.o'):
+for f in ('xstreamlib.c', 'xstreamlib.o'):
     try:
         os.unlink(f)
     except FileNotFoundError:
         pass
 
 # VERIFY
-assert 64 <= os.stat('xhashlib.so').st_size
+assert 64 <= os.stat('xstreamlib.so').st_size

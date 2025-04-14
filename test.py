@@ -1,25 +1,46 @@
 #!/usr/bin/python
 
 import time
+import cffi
+import xstreamlib
 
-from hashlib import sha1, sha256, sha512, blake2b
-from xxhash import xxh64_intdigest, xxh128_intdigest
-from xhash import xhash16, xhash64, xhash128, xhash256
+from xstream import xcsum, xhash
+
+#
+TEST_BUFF_SIZE = 262144
+
+# SAMPLE DATA
+sample = open('/dev/urandom', 'rb').read(TEST_BUFF_SIZE)
+
+#
+print(xcsum(sample))
+print(xhash(sample))
 
 # BENCHMARK
 
-TEST_ROUNDS = 65536
-TEST_SIZE = 262144
+# HASH OF THE SAMPLE DATA
+shash = cffi.FFI().new('unsigned char [16]')
 
-sample = open('/dev/urandom', 'rb').read(TEST_SIZE)
+for func in (
+    xstreamlib.lib.xcsum,
+    xstreamlib.lib.xhash,
+):
 
-t = time.time() ; sum(( 0 * xhash16(sample)               for _ in range (TEST_ROUNDS) )) ; print('XHASH16',  time.time() - t)
-t = time.time() ; sum(( 0 * xhash64(sample)               for _ in range (TEST_ROUNDS) )) ; print('XHASH64',  time.time() - t)
-t = time.time() ; sum(( 0 * len(xhash256(sample))         for _ in range (TEST_ROUNDS) )) ; print('XHASH256', time.time() - t)
-t = time.time() ; sum(( 0 * len(xhash128(sample))         for _ in range (TEST_ROUNDS) )) ; print('XHASH128', time.time() - t)
-t = time.time() ; sum(( 0 * xxh64_intdigest(sample)       for _ in range (TEST_ROUNDS) )) ; print('XXH64',    time.time() - t)
-t = time.time() ; sum(( 0 * xxh128_intdigest(sample)      for _ in range (TEST_ROUNDS) )) ; print('XXH128',   time.time() - t)
-t = time.time() ; sum(( 0 * len(sha1(sample).digest())    for _ in range (TEST_ROUNDS) )) ; print('SHA1',     time.time() - t)
-t = time.time() ; sum(( 0 * len(sha256(sample).digest())  for _ in range (TEST_ROUNDS) )) ; print('SHA256',   time.time() - t)
-t = time.time() ; sum(( 0 * len(sha512(sample).digest())  for _ in range (TEST_ROUNDS) )) ; print('SHA512',   time.time() - t)
-t = time.time() ; sum(( 0 * len(blake2b(sample).digest()) for _ in range (TEST_ROUNDS) )) ; print('BLAKE2B',  time.time() - t)
+    for size, rounds in (
+        (128,          1000),
+        (256,          1000),
+        (1024,         1000),
+        (65536,        10),
+        (256*1024,     10),
+        (64*1024*1024, 10),
+    ):
+
+        t = time.time()
+
+        for _ in range (rounds):
+            func(sample, size, shash)
+            #return bytes(shash)
+
+        t = time.time() - t
+
+        print(f'{func} SIZE {size} ROUNDS {rounds} TOOK {t} SECONDS')
