@@ -135,5 +135,6 @@ u64 xhash64 (const void* restrict data, uint size) {
         H += (x += B) * A;
     }
 
-    return x;
+    // PARANOIA
+    return swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H;
 }
