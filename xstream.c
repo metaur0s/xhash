@@ -47,21 +47,13 @@ void xhash (const void* restrict data, uint size, u64 hash[2]) {
             data += sizeof(u8);
         }
 
-        //
-        x = swap64((swap64((swap64((swap64((x + A) ^ B) + C) ^ D) + E) ^ F) + G) ^ H);
-
         // ACCUMULATE AND MIX ALL
-        A += (x += H) * C;
-        B += (x += G) * D;
-        C += (x += F) * E;
-        D += (x += E) * F;
-        E += (x += D) * G;
-        F += (x += C) * H;
-        G += (x += B) * A;
-        H += (x += A) * B;
+        H += G ^= F += E ^= x += D ^= C += B ^= A += x;
+        F += H ^= D += B ^= x += A ^= E += G ^= C += x;
+        A += B ^= C += D ^= x += E ^= F += G ^= H += x;
 
-        // PARANOIA
-        x *= size;
+        // POSITION DEPENDENT
+        x += (~x) * size;
     }
 
     hash[0] = ((((((A + B) * C) + D) * E) + F) * G) + H;
@@ -87,12 +79,11 @@ u64 xcsum (const void* restrict data, uint size, u64 x) {
         }
 
         // ACCUMULATE AND MIX ALL
-        A += B += (x += D) * C;
-        C += D += (x += B) * A;
+        A += B ^= x += C ^= D += x;
 
-        //
+        // POSITION DEPENDENT
         x += x * size;
     }
 
-    return x;
+    return ((((x * A)) + B) * C) + D;
 }
