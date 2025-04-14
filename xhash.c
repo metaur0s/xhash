@@ -3,7 +3,9 @@
 
 typedef unsigned int uint;
 
-typedef uint8_t u8;
+typedef uint8_t   u8;
+typedef uint32_t u32;
+typedef uint16_t u16;
 typedef uint64_t u64;
 
 #define popcount64 __builtin_popcountll
@@ -46,7 +48,7 @@ void xhash256 (const void* restrict data, uint size, u64 hash[4]) {
         }
 
         //
-        x = swap64(swap64(swap64(x + F) + D) + H) + B;
+        x = swap64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H);
 
         // ACCUMULATE AND MIX ALL
         E += A += x += C * H;
@@ -59,7 +61,7 @@ void xhash256 (const void* restrict data, uint size, u64 hash[4]) {
         D += H += x += B * A;
 
         // PARANOIA
-        x = swap64(swap64(swap64(x + A) + C) + E) + G;
+        x = swap64(x + size);
     }
 
     hash[0] = x + A + E;
@@ -88,7 +90,7 @@ void xhash128 (const void* restrict data, uint size, u64 hash[2]) {
         }
 
         //
-        x = swap64(swap64(swap64(x + F) + D) + H) + B;
+        x = swap64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H);
 
         // ACCUMULATE AND MIX ALL
         E += A += x += C * H;
@@ -101,7 +103,7 @@ void xhash128 (const void* restrict data, uint size, u64 hash[2]) {
         D += H += x += B * A;
 
         // PARANOIA
-        x = swap64(swap64(swap64(x + A) + C) + E) + G;
+        x = swap64(x + size);
     }
 
     hash[0] = x + A + E + C + G;
@@ -128,7 +130,7 @@ u64 xhash64 (const void* restrict data, uint size) {
         }
 
         //
-        x = swap64(swap64(swap64(x + F) + D) + H) + B;
+        x = swap64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H);
 
         // ACCUMULATE AND MIX ALL
         E += A += x += C * H;
@@ -141,8 +143,39 @@ u64 xhash64 (const void* restrict data, uint size) {
         D += H += x += B * A;
 
         // PARANOIA
-        x = swap64(swap64(swap64(x + A) + C) + E) + G;
+        x = swap64(x + size);
     }
 
     return x;
+}
+
+// FOR SMALL THINGS
+u16 xhash16 (const void* restrict data, uint size) {
+
+    u64 A = 0x5F62C0DECB051668ULL, B = 0xD0BE70F475039C26ULL,
+        C = 0x0C6771D8D076FAEDULL, D = 0xE697EB07151FA162ULL;
+
+    u64 x = 0;
+
+    while (size) {
+
+        if (size >= sizeof(u64)) {
+            size -= sizeof(u64);
+            x += BE64(*(u64*)data);
+            data += sizeof(u64);
+        } else {
+            size -= sizeof(u8);
+            x += BE8(*(u8*)data);
+            data += sizeof(u8);
+        }
+
+        // ACCUMULATE AND MIX ALL
+        x += D += C += B += A += (x * B) + D;
+    }
+
+    x += x >> 32;
+    x += x >> 16;
+    x &= 0xFFFFU;
+
+    return (u16)x;
 }

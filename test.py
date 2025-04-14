@@ -4,7 +4,7 @@ import time
 
 from hashlib import sha1, sha256, sha512, blake2b
 from xxhash import xxh64_intdigest, xxh128_intdigest
-from xhash import xhash64, xhash128, xhash256
+from xhash import xhash16, xhash64, xhash128, xhash256
 
 # BENCHMARK
 
@@ -13,6 +13,7 @@ TEST_SIZE = 262144
 
 sample = open('/dev/urandom', 'rb').read(TEST_SIZE)
 
+t = time.time() ; sum(( 0 * xhash16(sample)               for _ in range (TEST_ROUNDS) )) ; print('XHASH16',  time.time() - t)
 t = time.time() ; sum(( 0 * xhash64(sample)               for _ in range (TEST_ROUNDS) )) ; print('XHASH64',  time.time() - t)
 t = time.time() ; sum(( 0 * len(xhash256(sample))         for _ in range (TEST_ROUNDS) )) ; print('XHASH256', time.time() - t)
 t = time.time() ; sum(( 0 * len(xhash128(sample))         for _ in range (TEST_ROUNDS) )) ; print('XHASH128', time.time() - t)

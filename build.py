@@ -26,6 +26,7 @@ ffi.set_source("xhashlib", open('xhash.c').read(), libraries=[],
     ]
 )
 
+ffi.cdef('unsigned short xhash16 (const void* restrict, const unsigned int);')
 ffi.cdef('unsigned long long xhash64 (const void* restrict, const unsigned int);')
 ffi.cdef('void xhash128 (const void* restrict, const unsigned int, void* const restrict);')
 ffi.cdef('void xhash256 (const void* restrict, const unsigned int, void* const restrict);')
