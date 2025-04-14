@@ -37,16 +37,16 @@ void xhash256 (const void* restrict data, uint size, u64 hash[4]) {
 
         if (size >= sizeof(u64)) {
             size -= sizeof(u64);
-            x = BE64(*(u64*)data);
+            x += BE64(*(u64*)data);
             data += sizeof(u64);
         } else {
             size -= sizeof(u8);
-            x = BE8(*(u8*)data);
+            x += BE8(*(u8*)data);
             data += sizeof(u8);
         }
 
         //
-        x = swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H;
+        x = swap64(swap64(swap64(x + F) + D) + H) + B;
 
         // ACCUMULATE AND MIX ALL
         A += (x += C) * H;
@@ -57,12 +57,15 @@ void xhash256 (const void* restrict data, uint size, u64 hash[4]) {
         F += (x += H) * C;
         G += (x += A) * B;
         H += (x += B) * A;
+
+        // PARANOIA
+        x = swap64(swap64(swap64(x + A) + C) + E) + G;
     }
 
-    hash[0] = (x * A) + E;
-    hash[1] = (x * B) + F;
-    hash[2] = (x * C) + G;
-    hash[3] = (x * D) + H;
+    hash[0] = x + A + E;
+    hash[1] = x + B + F;
+    hash[2] = x + C + G;
+    hash[3] = x + D + H;
 }
 
 void xhash128 (const void* restrict data, uint size, u64 hash[2]) {
@@ -76,16 +79,16 @@ void xhash128 (const void* restrict data, uint size, u64 hash[2]) {
 
         if (size >= sizeof(u64)) {
             size -= sizeof(u64);
-            x = BE64(*(u64*)data);
+            x += BE64(*(u64*)data);
             data += sizeof(u64);
         } else {
             size -= sizeof(u8);
-            x = BE8(*(u8*)data);
+            x += BE8(*(u8*)data);
             data += sizeof(u8);
         }
 
         //
-        x = swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H;
+        x = swap64(swap64(swap64(x + F) + D) + H) + B;
 
         // ACCUMULATE AND MIX ALL
         A += (x += C) * H;
@@ -96,10 +99,13 @@ void xhash128 (const void* restrict data, uint size, u64 hash[2]) {
         F += (x += H) * C;
         G += (x += A) * B;
         H += (x += B) * A;
+
+        // PARANOIA
+        x = swap64(swap64(swap64(x + A) + C) + E) + G;
     }
 
-    hash[0] = (x * (A + E)) + C + G;
-    hash[1] = (x * (B + F)) + D + H;
+    hash[0] = x + A + E + C + G;
+    hash[1] = x + B + F + D + H;
 }
 
 u64 xhash64 (const void* restrict data, uint size) {
@@ -113,16 +119,16 @@ u64 xhash64 (const void* restrict data, uint size) {
 
         if (size >= sizeof(u64)) {
             size -= sizeof(u64);
-            x = BE64(*(u64*)data);
+            x += BE64(*(u64*)data);
             data += sizeof(u64);
         } else {
             size -= sizeof(u8);
-            x = BE8(*(u8*)data);
+            x += BE8(*(u8*)data);
             data += sizeof(u8);
         }
 
         //
-        x = swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H;
+        x = swap64(swap64(swap64(x + F) + D) + H) + B;
 
         // ACCUMULATE AND MIX ALL
         A += (x += C) * H;
@@ -133,8 +139,10 @@ u64 xhash64 (const void* restrict data, uint size) {
         F += (x += H) * C;
         G += (x += A) * B;
         H += (x += B) * A;
+
+        // PARANOIA
+        x = swap64(swap64(swap64(x + A) + C) + E) + G;
     }
 
-    // PARANOIA
-    return swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H;
+    return x;
 }
