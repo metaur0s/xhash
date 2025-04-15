@@ -21,8 +21,9 @@ ffi.set_source("xstreamlib", open('xstream.c').read(), libraries=[],
         "-Werror",
         "-Wfatal-errors",
         "-O2",
+#        "-ffast-math",
         "-march=native",
-      # "-fstrict-aliasing"
+       # "-fstrict-aliasing"
     ]
 )
 
