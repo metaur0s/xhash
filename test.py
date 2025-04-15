@@ -21,12 +21,11 @@ print('xhash()     = ', xhash(sample))
 # BENCHMARK
 
 # HASH OF THE SAMPLE DATA
-shash = cffi.FFI().new('unsigned char [16]')
-scsum = cffi.FFI().new('unsigned char [64]')
+shash = cffi.FFI().new('unsigned char [72]')
 
-for FUNC, func, arg in (
-    ('XHASH', xstreamlib.lib.xhash, shash),
-    ('XCSUM', xstreamlib.lib.xcsum, scsum),
+for FUNC, func in (
+    ('XHASH', xstreamlib.lib.xhash),
+    ('XCSUM', xstreamlib.lib.xcsum),
 ):
 
     print(f'----- {FUNC}')
@@ -47,7 +46,7 @@ for FUNC, func, arg in (
         t = time.time()
 
         for _ in range (rounds):
-            func(sample, size, arg)
+            func(sample, size, shash)
             #return bytes(shash)
             # xstreamlib.lib.xhash(v, len(v), _hash)
 

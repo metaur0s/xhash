@@ -29,7 +29,7 @@ static inline u64 swap64 (const u64 x) {
 }
 
 // NOTE: THE HASH IS SAVED BIG ENDIAN
-void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xhash (const void* restrict data, uint size, u64 hash[2]) {
+void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xhash (const void* restrict data, uint size, u64 hash[9]) {
 
     // SIZE DEPENDENT
     register u64 A = 0b0101010101010101010101010101010101010101010101010101010101010101ULL * size; // 01
@@ -67,13 +67,20 @@ void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xhash 
         x = swap64(x + size);
     }
 
-    // DIFFERENT WAYS OF SEEING OUR WORDS
-    hash[0] = BE64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H);
-    hash[1] = BE64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + G) + E) + C) + A) + H) + F) + D) + B);
+    // ALL WORDS CONTAIN THE INFO
+    A += B += C += D += x += E += F += G += H +=
+        swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + H) + G) + F) + E) + D) + C) + B) + A;
+
+    // SAVE
+    hash[0] = BE64(x);
+    hash[1] = BE64(A); hash[2] = BE64(B);
+    hash[3] = BE64(C); hash[4] = BE64(D);
+    hash[5] = BE64(E); hash[6] = BE64(F);
+    hash[7] = BE64(G); hash[8] = BE64(H);
 }
 
 // FOR SMALL THINGS
-void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xcsum (const void* restrict data, uint size, u64 sum[]) {
+void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xcsum (const void* restrict data, uint size, u64 sum[8]) {
 
     register u64 A = 0b0101010101010101010101010101010101010101010101010101010101010101ULL; // 01
     register u64 B = 0b1101000010111110011100001111010001110101000000111001110000100110ULL;

@@ -13,7 +13,8 @@ CURRENT_MODULE_ID = 0x10000
                  F       WITH/WITHOUT FILE
  63 0b00111111 00111111
  64 0b01000000 01CCCUUU  FILE
-                    UUU  LEN 1-8 BASE 1 ORIG_SIZE     
+   --- O HASH LENGTH ENTAO E DE ACORDO COM O TAMANHO TOTAL
+                    UUU  LEN 1-8 BASE 1 ORIG_SIZE
                  CCC     LEN 1-8 BASE 1 X_SIZE
 127 0b01111111 01111111
 128 0b10000000 10000PPP  OFFSET
@@ -26,7 +27,7 @@ CURRENT_MODULE_ID = 0x10000
 255 0b11111111 11111111
 
 o checksum()
-da o 
+da o
 u64 csum[8];
 
 csum[0] = BE64(A);
@@ -55,7 +56,7 @@ ao cksum() e passado o endereco onde escrever
 // uma so funcaio checksum
 // ele ira salvar o que for necessario conforme o size acima
 u8  mask[]  masked    0 -  64
-u64 words[k] BE64()  65 - 512 
+u64 words[k] BE64()  65 - 512
 
 
 A BASE, PARA CADA WORD LENGTH
@@ -134,7 +135,7 @@ match c_function_read_at_opcode(self.cctx):
    case MODULE_CREATE:
         module_name_len
         module_name_pos
-     assert ((mod_current < len(mods)) or 
+     assert ((mod_current < len(mods)) or
              (mod_current == 0x10000 and len(mods) == 0))
      mod_current = len(mods)
      modNames.append(str.decode(buff[module_name_pos:module_name_pos+module_name_len]))

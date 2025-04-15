@@ -4,13 +4,13 @@ import cffi
 import xstreamlib
 
 # NOTE: SINGLE THREAD ONLY
-_hash = cffi.FFI().new('unsigned char [16]')
+_hash = cffi.FFI().new('unsigned char [72]')
 _csum = cffi.FFI().new('unsigned char [64]')
 
 def xhash_128 (v):
     assert isinstance(v, (bytes, bytearray, memoryview))
     xstreamlib.lib.xhash(v, len(v), _hash)
-    h = int.from_bytes(_hash, byteorder='big', signed=False)
+    h = int.from_bytes(_hash[0:16], byteorder='big', signed=False)
     # print('0x%032X' % h)
     return h
 
