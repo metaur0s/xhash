@@ -13,7 +13,7 @@ TEST_BUFF_SIZE = 256*1024*1024
 sample = open('/dev/urandom', 'rb').read(TEST_BUFF_SIZE)
 
 #
-print('xcsum()     = 0x%016X' % xcsum(sample))
+print('xcsum()     = ', xcsum(sample))
 print('xhash_64()  = 0x%016X' % xhash_64(sample))
 print('xhash_128() = 0x%032X' % xhash_128(sample))
 print('xhash()     = ', xhash(sample))
@@ -22,10 +22,11 @@ print('xhash()     = ', xhash(sample))
 
 # HASH OF THE SAMPLE DATA
 shash = cffi.FFI().new('unsigned char [16]')
+scsum = cffi.FFI().new('unsigned char [64]')
 
 for FUNC, func, arg in (
+    ('XCSUM', xstreamlib.lib.xcsum, scsum),
     ('XHASH', xstreamlib.lib.xhash, shash),
-    ('XCSUM', xstreamlib.lib.xcsum, None),
 ):
 
     print(f'----- {FUNC}')
@@ -46,10 +47,7 @@ for FUNC, func, arg in (
         t = time.time()
 
         for _ in range (rounds):
-            if arg is None:
-                func(sample, size)
-            else:
-                func(sample, size, arg)
+            func(sample, size, arg)
             #return bytes(shash)
             # xstreamlib.lib.xhash(v, len(v), _hash)
 

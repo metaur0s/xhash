@@ -70,15 +70,16 @@ void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xhash 
 }
 
 // FOR SMALL THINGS
-// NOTE: AQUI O ENDIANESS É LOCAL
-// NOTE: NAO USA STACK
-//
-u64 __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xcsum (const void* restrict data, uint size) {
+void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xcsum (const void* restrict data, uint size, u64 sum[]) {
 
     register u64 A = 0b0101010101010101010101010101010101010101010101010101010101010101ULL; // 01
     register u64 B = 0b1101000010111110011100001111010001110101000000111001110000100110ULL;
-    register u64 C = 0b1010101010101010101010101010101010101010101010101010101010101010ULL; // 10
-    register u64 D = 0b1110011010010111111010110000011100010101000111111010000101100010ULL;
+    register u64 C = 0b0000101000101000010010010100110100000100011100001111101111001111ULL;
+    register u64 D = 0b0010001001101001111001001000110010100111011101111010011110011000ULL;
+    register u64 E = 0b1010101010101010101010101010101010101010101010101010101010101010ULL; // 10
+    register u64 F = 0b1110011010010111111010110000011100010101000111111010000101100010ULL;
+    register u64 G = 0b0111111011010110110100101100010001000101110110011111010111110110ULL;
+    register u64 H = 0b0100011111011111100111001000111000011010001101011111000110111010ULL;
 
     while (size) {
 
@@ -94,10 +95,17 @@ u64 __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xcsum (
             data += sizeof(u8);
         }
 
-        // ACCUMULATE ALL, POSITION DEPENDENT
-        A += B ^= x += C ^= D += x;
+        // ACCUMULATE ALL
+        A += B ^= C += D ^= x += E ^= F += G ^= H += x * popcount64(x);
     }
 
-    //
-    return ((A + C) * B) + D;
+    // ALL WORDS CONTAIN THE INFO
+    A += B += C += D += E += F += G += H +=
+        ((((((H + G) * F) + E) * D) + C) * B) + A;
+
+    // SAVE
+    sum[0] = BE64(A); sum[1] = BE64(B);
+    sum[2] = BE64(C); sum[3] = BE64(D);
+    sum[4] = BE64(E); sum[5] = BE64(F);
+    sum[6] = BE64(G); sum[7] = BE64(H);
 }
