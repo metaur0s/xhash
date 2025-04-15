@@ -7,31 +7,41 @@ CURRENT_MODULE_ID = 0x10000
       \\______      WHAT_SIZE | X_SIZE
            0bXX -> 0 A 4 -> 1 A 5
 
-  0 0b00000000 000FWWTT  ENTRY
+  0 0b00000000 00FWWWTT  ENTRY
                      TT  LEN 1-4 BASE 0 TIME
-                   WW    LEN 1-4 BASE 0 WHAT_SIZE
-                  F      WITH/WITHOUT FILE
- 31 0b00011111 00011111
- 32 0b00100000 001RCCUU  FILE
-                     UU  LEN 1-4 BASE 1 ORIG_SIZE     
-                   CC    LEN 1-4 BASE 1 X_SIZE
-                  R      RESERVED
+                  WWW    LEN 0-7 BASE 1 WHAT_SIZE
+                 F       WITH/WITHOUT FILE
  63 0b00111111 00111111
- 64 0b01000000 010RCCUU  FILE
-                     UU  LEN 5-8 BASE 1 ORIG_SIZE     
-                   CC    LEN 5-8 BASE 1 X_SIZE
-                  R      RESERVED
- 95 0b01011111 01011111
- 96 0b01100000 01100PPP  OFFSET
+ 64 0b01000000 01CCCUUU  FILE
+                    UUU  LEN 1-8 BASE 1 ORIG_SIZE     
+                 CCC     LEN 1-8 BASE 1 X_SIZE
+127 0b01111111 01111111
+128 0b10000000 10000PPP  OFFSET
                     PPP  LEN 1-8 BASE 0 OFFSET
-103 0b01100111 01100111
-104 0b01101000 01101KKK  CHECKSUM   [16 | 32 | 64 | 128 | 256 | 512]
-                    KKK  LEN 1-8 BASE 0 VARIABLE LENGTH ONLY IF [16 | 32 | 64]
-                           IF [16 | 32 | 64], COLOCA BYTE A BYTE, SENAO, BE64()
-111 0b01101111 01101111
-112 0b01110000 01110000  RESERVED
-255 0b11111111 11111111  END
+135 0b10000111 10000111
+136 0b10001000 10001000  RESERVED
+191 0b10111111 10111111  END
+192 0b11000000 11KKKKKK  CHECKSUM [1 - 64 BYTES] / [8 - 512 BITS]
+                 KKKKKK  LEN 1-64 BASE ---
+255 0b11111111 11111111
 
+o checksum()
+da o 
+u64 csum[8];
+
+csum[0] = BE64(A);
+csum[7] = BE64(H);
+
+e ai da o memcpy() e memcmp() conforme o caso!
+
+ao cksum() e passado o endereco onde escrever
+   - o stream writer coloca na posicao atual e recua conforme o tamanho desejado
+   - o reader segue o opcode e da o cmp conforme o tamanho
+             o reader faz o cksum() em sua stack
+
+--- nao usar csum dentro de ocntextos, pois ai nao pode recuperar arquivos perdidos!
+
+// 'E UMA CONFIGURACAO, E NAO O PROTOCOLO!!!!
 // SE EMITIR UM CHECKSUM, ESTE SERA O TIPO
 //      RELATIVO A SIZE VS WIDTH - O QUE TAL CHECKSUM PODE PROTEGER
 #define CHECKSUM_512_AT ( 16 * 1024 * 1024)
