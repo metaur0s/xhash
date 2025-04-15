@@ -95,7 +95,7 @@ u64 __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xcsum (
         }
 
         // ACCUMULATE ALL, POSITION DEPENDENT
-        A += B ^= x += C ^= D += x; // * size
+        A += B ^= x += C ^= D += x;
     }
 
     //

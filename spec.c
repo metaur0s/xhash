@@ -7,24 +7,46 @@ CURRENT_MODULE_ID = 0x10000
       \\______      WHAT_SIZE | X_SIZE
            0bXX -> 0 A 4 -> 1 A 5
 
- 64 0b01000000 0100BBAA  FILE   ======= ATE > 8GB DE ARQUIVOS
-                     AA  LEN 1-4 BASE 1   ORIG_SIZE     
-                   BB    LEN 1-4 BASE 1   X_SIZE
- 80 0b01010000 0101BBAA  FILE   ======= ACIMA DE 8GB
-                     AA  LEN 5-8 BASE 1   ORIG_SIZE     
-                   BB    LEN 5-8 BASE 1   X_SIZE
-    0bXXXXXXXX 1010XAAA  POSITION
-                    AAA  LEN 1-8 BASE 0   POSITION
-    0bXXXXXXXX 1011X---  RESERVED
-    0bXXXXXXXX 11000AAA  CHECKSUM64
-                    AAA  LEN 1-8 BASE 0   CHECKSUM
-    0bXXXXXXXX 11001XXX  RESERVED
-    0bXXXXXXXX 1101XXXX  RESERVED
-    0bXXXXXXXX 1110XXXX  RESERVED
-240 0b11110000 11110000  RESERVED
-               1111....  RESERVED
-               11111110  RESERVED
+  0 0b00000000 000FWWTT  ENTRY
+                     TT  LEN 1-4 BASE 0 TIME
+                   WW    LEN 1-4 BASE 0 WHAT_SIZE
+                  F      WITH/WITHOUT FILE
+ 31 0b00011111 00011111
+ 32 0b00100000 001RCCUU  FILE
+                     UU  LEN 1-4 BASE 1 ORIG_SIZE     
+                   CC    LEN 1-4 BASE 1 X_SIZE
+                  R      RESERVED
+ 63 0b00111111 00111111
+ 64 0b01000000 010RCCUU  FILE
+                     UU  LEN 5-8 BASE 1 ORIG_SIZE     
+                   CC    LEN 5-8 BASE 1 X_SIZE
+                  R      RESERVED
+ 95 0b01011111 01011111
+ 96 0b01100000 01100PPP  OFFSET
+                    PPP  LEN 1-8 BASE 0 OFFSET
+103 0b01100111 01100111
+104 0b01101000 01101KKK  CHECKSUM   [16 | 32 | 64 | 128 | 256 | 512]
+                    KKK  LEN 1-8 BASE 0 VARIABLE LENGTH ONLY IF [16 | 32 | 64]
+                           IF [16 | 32 | 64], COLOCA BYTE A BYTE, SENAO, BE64()
+111 0b01101111 01101111
+112 0b01110000 01110000  RESERVED
 255 0b11111111 11111111  END
+
+// SE EMITIR UM CHECKSUM, ESTE SERA O TIPO
+//      RELATIVO A SIZE VS WIDTH - O QUE TAL CHECKSUM PODE PROTEGER
+#define CHECKSUM_512_AT ( 16 * 1024 * 1024)
+#define CHECKSUM_256_AT (  4 * 1024 * 1024)
+#define CHECKSUM_128_AT (       512 * 1024)
+#define CHECKSUM_64_AT  (              768)
+#define CHECKSUM_32_AT  (              256)
+#define CHECKSUM_16_AT  (               64)
+#define CHECKSUM_8_AT   (                0)
+
+// uma so funcaio checksum
+// ele ira salvar o que for necessario conforme o size acima
+u8  mask[]  masked    0 -  64
+u64 words[k] BE64()  65 - 512 
+
 
 A BASE, PARA CADA WORD LENGTH
    ========        *     *   ====== NO CASO DO CSUM/POSITION, ESSA BASE AQUI É 0 E NÃO 1, POIS EXISTE SIM O 0
@@ -39,22 +61,17 @@ A BASE, PARA CADA WORD LENGTH
 
 
 0x0? ENTRY NULL
-     ??   WHEN
+     ??   TIME
      ??   WHAT_SIZE
      U8   WHAT[WHAT_SIZE]
-0x1? ENTRY FILE
-     U64  ORIG_HASH[2]
-     ??   WHEN
-     ??   WHAT_SIZE
-     U8   WHAT[WHAT_SIZE]
-0x2? FILE   (BELONGS TO CURRENT MODULE HASH TREE)
+0x1? FILE   (BELONGS TO CURRENT MODULE HASH TREE)
      U64  ORIG_HASH[2]
      ??   ORIG_SIZE
      ??   X_SIZE  <----     É ESTE VALOR  QUE TEM QUE SER USADO PARA IR SALTANDO   /   SE != ORIG_SIZE, ENTAO ESTÁ COMPRESSED
      U8   X[X_SIZE]
-0x3? MODULE CHANGE
+0x2? MODULE CHANGE
      ??   MODULE_ID
-0x4? MODULE CREATE
+0x3? MODULE CREATE
      ??   MODULE_NAME_LEN
      CHAR MODULE_NAME[MODULE_NAME_LEN]
 0x5? POSITION
