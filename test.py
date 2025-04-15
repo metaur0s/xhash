@@ -4,7 +4,7 @@ import time
 import cffi
 import xstreamlib
 
-from xstream import xcsum, xhash
+from xstream import xcsum, xhash, xhash_64, xhash_128
 
 #
 TEST_BUFF_SIZE = 256*1024*1024
@@ -13,8 +13,10 @@ TEST_BUFF_SIZE = 256*1024*1024
 sample = open('/dev/urandom', 'rb').read(TEST_BUFF_SIZE)
 
 #
-print('xcsum() = 0x%016X' % xcsum(sample))
-print('xhash() = ', xhash(sample))
+print('xcsum()     = 0x%016X' % xcsum(sample))
+print('xhash_64()  = 0x%016X' % xhash_64(sample))
+print('xhash_128() = 0x%032X' % xhash_128(sample))
+print('xhash()     = ', xhash(sample))
 
 # BENCHMARK
 
@@ -22,8 +24,8 @@ print('xhash() = ', xhash(sample))
 shash = cffi.FFI().new('unsigned char [16]')
 
 for FUNC, func, arg in (
-    ('XHASH', xstreamlib.lib.xhash, shash),
-    ('XCSUM', xstreamlib.lib.xcsum, 0),
+    # ('XHASH', xstreamlib.lib.xhash, shash),
+    ('XCSUM', xstreamlib.lib.xcsum, None),
 ):
 
     print(f'----- {FUNC}')
@@ -31,12 +33,12 @@ for FUNC, func, arg in (
     for size, rounds in (
         ( 64,          5000000),
         (128,          5000000),
-        (256,          3500000),
-        (1024,         1000000),
-        (65536,          20000),
-        (256*1024,        8000),
-        (64*1024*1024,     100),
-        (128*1024*1024,     10),
+        (256,          5000000),
+        (1024,         4000000),
+        (65536,         120000),
+        (256*1024,       50000),
+        (64*1024*1024,     200),
+        (128*1024*1024,    100),
     ):
 
         assert size <= TEST_BUFF_SIZE
@@ -44,7 +46,10 @@ for FUNC, func, arg in (
         t = time.time()
 
         for _ in range (rounds):
-            func(sample, size, arg)
+            if arg is None:
+                func(sample, size)
+            else:
+                func(sample, size, arg)
             #return bytes(shash)
             # xstreamlib.lib.xhash(v, len(v), _hash)
 

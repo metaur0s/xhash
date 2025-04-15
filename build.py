@@ -26,7 +26,7 @@ ffi.set_source("xstreamlib", open('xstream.c').read(), libraries=[],
     ]
 )
 
-ffi.cdef('unsigned long long xcsum (const void* restrict, const unsigned int, unsigned long long);')
+ffi.cdef('unsigned long long xcsum (const void* restrict, const unsigned int);')
 ffi.cdef('void xhash (const void* restrict, const unsigned int, void* const restrict);')
 
 ffi.compile(target=('xstreamlib.so'))
