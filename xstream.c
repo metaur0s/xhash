@@ -68,15 +68,15 @@ void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xhash 
     }
 
     // ALL WORDS CONTAIN THE INFO
-    A += B += C += D += x += E += F += G += H +=
+    A += B += C += D += E += F += G += H +=
         swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + H) + G) + F) + E) + D) + C) + B) + A;
 
     // SAVE
-    hash[0] = BE64(x);
-    hash[1] = BE64(A); hash[2] = BE64(B);
-    hash[3] = BE64(C); hash[4] = BE64(D);
-    hash[5] = BE64(E); hash[6] = BE64(F);
-    hash[7] = BE64(G); hash[8] = BE64(H);
+    hash[0] = BE64(A); hash[1] = BE64(B);
+    hash[2] = BE64(C); hash[3] = BE64(D);
+    hash[4] = BE64(E); hash[5] = BE64(F);
+    hash[6] = BE64(G); hash[7] = BE64(H);
+    hash[8] = BE64(x);
 }
 
 // FOR SMALL THINGS
