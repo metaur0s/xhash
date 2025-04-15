@@ -25,8 +25,8 @@ shash = cffi.FFI().new('unsigned char [16]')
 scsum = cffi.FFI().new('unsigned char [64]')
 
 for FUNC, func, arg in (
-    ('XCSUM', xstreamlib.lib.xcsum, scsum),
     ('XHASH', xstreamlib.lib.xhash, shash),
+    ('XCSUM', xstreamlib.lib.xcsum, scsum),
 ):
 
     print(f'----- {FUNC}')

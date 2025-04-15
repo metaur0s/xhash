@@ -55,9 +55,12 @@ void __attribute__((optimize("-O3", "-ffast-math", "-fstrict-aliasing"))) xhash 
             data += sizeof(u8);
         }
 
+        //
+        A += E += x += G += C += x * popcount64(x);
+        F += H += x += D += B += x * popcount64(x);
+
         // ACCUMULATE AND MIX ALL
         H += G ^= F += E ^= x += D ^= C += B ^= A += swap64(x);
-        F += H ^= D += B ^= x += A ^= E += G ^= C += swap64(x);
         A += B ^= C += D ^= x += E ^= F += G ^= H += swap64(x);
 
         // POSITION DEPENDENT
