@@ -54,21 +54,18 @@ void xhash (const void* restrict data, uint size, u64 hash[2]) {
             data += sizeof(u8);
         }
 
-        // VALUE DEPENDENT
-        x += x * popcount64(x);
-
         // ACCUMULATE AND MIX ALL
-        H += G ^= F += E ^= x += D ^= C += B ^= A += x;
-        F += H ^= D += B ^= x += A ^= E += G ^= C += x;
-        A += B ^= C += D ^= x += E ^= F += G ^= H += x;
+        H += G ^= F += E ^= x += D ^= C += B ^= A += swap64(x);
+        F += H ^= D += B ^= x += A ^= E += G ^= C += swap64(x);
+        A += B ^= C += D ^= x += E ^= F += G ^= H += swap64(x);
 
         // POSITION DEPENDENT
-        x += x * size;
+        x = swap64(x + size);
     }
 
     // DIFFERENT WAYS OF SEEING OUR WORDS
-    hash[0] = BE64((((((((x * B) + D) * F) + H) * A) + C) * E) + G);
-    hash[1] = BE64((((((((x * G) + E) * C) + A) * H) + F) * D) + B);
+    hash[0] = BE64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + A) + B) + C) + D) + E) + F) + G) + H);
+    hash[1] = BE64(swap64(swap64(swap64(swap64(swap64(swap64(swap64(x + G) + E) + C) + A) + H) + F) + D) + B);
 }
 
 // FOR SMALL THINGS
